@@ -156,15 +156,16 @@
                     put = this.bot.getPut(board, color)
 
                 setTimeout(() => {
-                    if (put != null) {
+
+                    if (put == null) {
+                        this.game.passTurn()
+                    } else {
                         this.game.put(put, color)
                         this.game.toggleTurn()
                     }
 
-                    if (this.game.canContinue()) {
-                        if (put == null) this.game.passTurn()
-                        this.doPlayerTurn()
-                    }
+                    this.doPlayerTurn()
+
                 }, 300)
             },
             doPlayerTurn: function() {
