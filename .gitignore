@@ -1,1 +1,4 @@
 /public/assets/lib/*
+
+**/node_modules/*
+**/.firebaserc
