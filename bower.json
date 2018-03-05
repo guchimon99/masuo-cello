@@ -1,0 +1,24 @@
+{
+  "name": "masuo-cello",
+  "authors": [
+    "guchimon99 <guchimon99@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "vue": "^2.5.13",
+    "vue-router": "^3.0.1",
+    "webfontloader": "^1.6.28",
+    "fontawesome": "^5.0.7",
+    "normalize-css": "^8.0.0"
+  }
+}

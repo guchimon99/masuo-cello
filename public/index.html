@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ますお・セロ | イナゴー波は負けない</title>
+    <meta property="og:title" content="ますお・セロ">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://masuo-cello.firebaseapp.com">
+    <meta property="og:image" content="https://masuo-cello.firebaseapp.com/assets/img/og.png">
+    <meta property="og:site_name" content="ますお・セロ | イナゴー波は負けない">
+    <meta property="og:description" content="ますおでますおをひっくり返せ！！">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="transparent">
+    <link rel="icon" type="image/png" href="/assets/img/icon.png">
+    <link rel="apple-touch-icon" type="image/png" href="/assets/img/icon.png">
+    <link rel="stylesheet" type="text/css" href="assets/lib/normalize-css/normalize.css">
+    <link rel="stylesheet" type="text/css" href="assets/lib/fontawesome/web-fonts-with-css/css/fontawesome-all.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
+</head>
+<body>
+
+<div id="app" class="app">
+    <router-view v-if="!isLoading"></router-view>
+    <splash :is-shown="isLoading"></splash>
+</div>
+
+<script type="text/x-template" id="splash-template">
+<div class="splash scene-full" v-bind:class="rootClass">
+    <img src="/assets/img/brand.svg" class="splash_brand">
+</div>
+</script>
+
+<script type="text/x-template" id="start-scene-template">
+<div class="scene-full scene-start">
+    <img src="/assets/img/start_brand.svg" class="start_brand">
+    <div class="start_actions">
+        <router-link to="/play" class="start_action">スタート</router-link>
+    </div>
+</div>
+</script>
+
+<script type="text/x-template" id="play-scene-template">
+<div class="play scene-full scene-play">
+    <face-background></face-background>
+    <div class="play_nav">
+        <button class="play_menuButton" v-on:click="menuShown = true"><i class="fa fa-bars"></i></button>
+    </div>
+    <div class="play_body">
+        <div class="play_board">
+            <board :board="board" v-if="board" v-on:select-cell="selectCell"></board>
+        </div>
+    </div>
+    <div class="play_foot">
+        <game-status :status="status"></game-status>
+    </div>
+    <div class="modal" v-if="menuShown">
+        <div class="dialog">
+            <div class="dialog_head">
+                <button class="dialog_close" v-on:click="menuShown = false">
+                    <i class="fa fa-times"></i>
+                </button>
+                <div class="dialog_title">メニュー</div>
+            </div>
+            <div class="dialog_body">
+                <div class="menu">
+                    <button class="menu_item" v-on:click="resetGame()">
+                        <i class="fa fa-sync-alt mr-4"></i>やり直す
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" v-if="resultShown">
+        <div class="dialog">
+            <div class="dialog_head">
+                <div class="dialog_title">結果</div>
+            </div>
+            <div class="dialog_body">
+                <div class="result">
+                    <div class="result_head">
+                        <div class="result_title" v-if="status.winPlayer != null">
+                            <strong>{{status.winPlayer.name}}</strong> の勝ち
+                        </div>
+                        <div class="result_title" v-else>
+                            <strong>引き分け</strong>
+                        </div>
+                    </div>
+                    <div class="result_body">
+                        <div class="result_player">
+                            <div class="result_playerName">{{status.players[0].name}}</div>
+                            <div class="result_playerScore">{{status.players[0].score}}</div>
+                        </div>
+                        <div class="result_player">
+                            <div class="result_playerName">{{status.players[1].name}}</div>
+                            <div class="result_playerScore">{{status.players[1].score}}</div>
+                        </div>
+                    </div>
+                    <div class="result_foot">
+                        <div class="menu">
+                            <button class="menu_item" v-on:click="resetGame()">
+                                <i class="fa fa-sync-alt mr-4"></i>やり直す
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</script>
+
+<script type="text/x-template" id="board-template">
+<div class="board">
+    <div class="board_body" v-if="board">
+        <div v-on:click="selectCell(index)" v-for="(cell, index) in board.cells" class="cell">
+            <div v-if="cell == 1" class="stone stone-black"></div>
+            <div v-if="cell == 2" class="stone stone-white"></div>
+        </div>
+    </div>
+</div>
+</script>
+
+<script type="text/x-template" id="game-status-template">
+<div class="gameStatus">
+    <div class="gameStatus_col gameStatus_col-player">
+        <player-status :turn="status.turn" :player="status.players[0]"></player-status>
+    </div>
+    <div class="gameStatus_col gameStatus_col-vs">
+        <div class="gameStatus_vs">
+            <span>VS</span>
+        </div>
+    </div>
+    <div class="gameStatus_col gameStatus_col-player">
+        <player-status :turn="status.turn" :player="status.players[1]"></player-status>
+    </div>
+</div>
+</script>
+
+<script type="text/x-template" id="player-status-template">
+    <div class="playerStatus">
+        <div class="playerStatus_color">
+            <span v-if="player.color == 1">先手 : 黒</span>
+            <span v-if="player.color == 2">後手 : 白</span>
+        </div>
+        <div class="playerStatus_body">
+            <div class="playerStatus_lump" v-bind:class="lumpClass"></div>
+            <div class="playerStatus_name">{{player.name}}</div>
+            <div class="playerStatus_score">{{player.score}}</div>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-template" id="face-background-template">
+<div class="faceBackground">
+    <div class="faceBackground_face" v-bind:style="faceStyle"></div>
+</div>
+</script>
+
+<!-- scripts -->
+<script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
+<script src="/assets/lib/webfontloader/webfontloader.js"></script>
+<script src="/assets/lib/vue/dist/vue.min.js"></script>
+<script src="/assets/lib/vue-router/dist/vue-router.min.js"></script>
+<script src="/assets/js/firebase-config.js"></script>
+<script src="/assets/js/reversi.js"></script>
+<script src="/assets/js/app.js"></script>
+
+</body>
+</html>
